@@ -1,0 +1,213 @@
+* {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  box-sizing: border-box;
+
+}
+body {
+  margin: 0;
+}
+
+html {
+  font-size: 62.5%;
+  overflow-x: hidden;
+}
+
+.menu {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0rem 0%;
+  margin: 0;
+  background: linear-gradient(rgba(0,0,0,.8), rgba(0,0,0,.8)), url("../pictures/login_reg_back.jpg");
+  background-color: #151719;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.menu .navbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  padding-top: 1rem;
+  z-index: 1000;
+  height: auto;
+  background-color: transparent;
+  text-align: center;
+  transition: all .3s ease-in-out;
+}
+
+.menu .navbar .logo img {
+  width: 15rem;
+  animation: rotate 12s infinite linear;
+}
+
+@keyframes rotate{
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.menu .navbar ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.menu .navbar ul li {
+  margin: 0rem 2rem;
+  list-style: none;
+}
+
+.menu .navbar ul li a {
+  font-size: 2.5rem;
+  color: white;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.menu .navbar.active {
+  background: #151719;
+  box-shadow: 0 .1rem .5rem rgba(0,0,0,0.25);
+}
+
+.menu .heading {
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  font-size: 10rem;
+  color: white;
+  text-align: center;
+  padding: 20rem 0rem 0rem;
+}
+.menu .order-inf {
+  font-size: 4rem;
+  color: #b3b3b3;
+  text-align: center;
+  padding: 0rem 0rem 2rem;
+
+}
+
+.menu .box-container .box img {
+  width:  30rem;
+  transition: 0.3s;
+}
+
+.menu .box-container .box img:hover {
+  transform: scale(1.15);
+  overflow: hidden;
+}
+
+.menu .box-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 0 ;
+  padding: 0rem 0%;
+}
+
+.menu .box-container .box {
+  flex: 1 1 20rem;
+  background: transparent;
+  margin: 1rem;
+  text-align: center;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  padding: 0rem;
+}
+.menu .box-container .box h3 {
+  color: white;
+  font-size: 2.5rem;
+  padding: 1rem 0rem;
+}
+
+.menu .box-container .box p {
+  color: white;
+  font-size: 1.7rem;
+  text-align: justify;
+  padding: 0rem 2.5rem;
+  font-weight: normal;
+}
+
+.menu .box-container .box .price {
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+  padding: 1.5rem 1.5rem;
+  font-weight: 800;
+}
+
+.menu .box-container .box .to_cart_btn {
+  background-color: transparent;
+  color: white;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 800;
+  padding: 10px 30px;
+  border-radius: 20px;
+  outline: none;
+  cursor: pointer;
+}
+
+.menu .box-container .box .counter {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+}
+
+.menu .box-container .box .counter .plus, .menu .box-container .box .counter .minus {
+  height: 25px;
+  width: 60px;
+  padding: 0 20px;
+  border-radius: 5px;
+  font-size: 20px;
+  background-color: transparent;
+  border: rgb(220, 220, 220);;
+  color: white;
+  margin: 20px;
+  display: inline;
+}
+
+.menu .box-container .box .counter .counter-value {
+  height: 25px;
+  min-width: 60px;
+  border-radius: 5px;
+  background-color: transparent;
+  margin-top: 20px;
+  font-size: 15px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: inline;
+}
+
+
+
+/* адаптивность под сужение-расширение */
+
+@media (max-width: 768px) {
+  .menu .navbar .logo img {
+    width: 10rem;
+  }
+  .menu .navbar ul li {
+    margin: 0.5rem;
+  }
+  .menu .navbar ul li a {
+    font-size: 1.8rem;
+  }
+}
+
+
