@@ -11,7 +11,7 @@ body{
     min-height: 100vh;
     margin: 0;
     background-color: transparent;
-    background:url('../pictures/login_reg_back.jpg') no-repeat;
+    background:url("../pictures/login_reg_back.jpg") no-repeat;
     background-size: cover;
     position: center;
 
@@ -51,6 +51,10 @@ body{
     border-radius: 30px;
     font-size: 15px;
     padding: 5px;
+}
+
+#error{
+    color: rgb(255, 255, 255, .9);
 }
 
 .registration .btn{
