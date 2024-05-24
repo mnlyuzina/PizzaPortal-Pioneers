@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+    <link rel="stylesheet" type="text/css" href="static/css/cart.css">
+</head>
+<body>
+    <h1>{{username}}, готовы заказать?</h1>
+    <table id="cartTable">
+        <thead>
+            <tr>
+                <th>Название пиццы</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Убрать из корзины</th>
+            </tr>
+        </thead>
+        <tbody id="cartBody">
+        <form action="/cart" method="POST">
+            {% for pizza in final_order %}
+            <tr>
+                <th>{{pizza.name}}</th>
+                <th>{{pizza.quantity}}</th>
+                <th>{{pizza.price}}</th>
+                <th>
+                    <button type="submit" class="remove_button" name="remove" value="{{pizza.name}}"></button>
+                </th>
+            </tr>
+            {% endfor %}
+            <tr>
+                <th id="full_price">Итого:</th>
+                <th></th>
+                <th>{{full_price}}</th>
+                <th></th>
+            </tr>
+        </form>
+        </tbody>
+    </table>
+    <div id="text_block">
+        <li id="back_to_cart"><a href="/add_to_cart">Вернуться к выбору пиццы</a></li>
+        <div id="time_choice">Пожалуйста, выберите время доставки:</div>
+        <form action="/make_order" method="POST">
+            <select name="chosen_time">
+            {% for time in order_times %}
+                <option value={{time}}>{{time}}</option>
+            {% endfor %}
+            </select>
+                <input type="submit" id="make_order_btn" value="Оформить заказ">
+        </form>
+    </div>
+    <div class="input-box" id="message">{{message}}</div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+body {
+    background: linear-gradient(rgba(0,0,0,.8), rgba(0,0,0,.8)), url("../pictures/login_reg_back.jpg");
+    background-color: #151719;
+}
+
+h1 {
+    text-align: center;
+    padding: 5rem;
+    color: white;
+}
+
+#cartTable {
+    width: 100%;
+    border: 1px solid grey;
+    border-radius: 1rem;
+    border-collapse: separate;
+    border-spacing: 0 1em;
+    background-color: rgba(0,0,0,0.3);
+
+}
+
+.remove_button {
+    background: url("../pictures/remove_btn.png");
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    border: none;
+    color: transparent;
+
+
+}
+thead {
+    font-size: 25px;
+}
+
+th {
+    width: 1%;
+    height: 10px;
+    color: white;
+    font-weight: normal;
+
+}
+
+tbody {
+    font-size: 21px;
+}
+
+#full_price {
+    font-size: 30px;
+    font-style: oblique;
+}
+
+
+li  {
+
+    text-align: justify;
+    display: inline-block;
+    padding: 100px;
+}
+
+ a {
+    color: floralwhite;
+    font-size: 25px;
+    text-decoration: none;
+
+}
+
+#text_block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#back_to_cart {
+    text-align: left;
+}
+
+
+#time_choice {
+    color: floralwhite;
+    font-size: 25px;
+    text-align: center;
+}
+
+#make_order_btn {
+    color:  floralwhite;
+    font-family: Times new roman, sans-serif;
+    font-size: 25px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+}
+
+#message {
+    color: white;
+    font-size: 25px;
+    text-align: center;
+}
+
+select {
+    color: white;
+    font-size: 17px;
+    background-color: #333333;
+    border: none;
+    width: auto;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-right: 200px;
+
+}
