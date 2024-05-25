@@ -139,7 +139,7 @@ class PizzaApp:
                     return render_template("registration.html", error="Пользователь с таким логином уже существует :(")
             else:
                 return render_template("registration.html")
-            
+
         @self.app.route("/add_to_cart", methods=["POST", "GET"])
         def making_order():
             """
@@ -223,9 +223,6 @@ class PizzaApp:
             return render_template("cart.html", username=self.name_of_user, final_order=final_order,
                                    full_price=full_price,
                                    order_times=variant_time())
-            
-            
-            
     def run(self):
         """
         Запуск приложения.
@@ -243,11 +240,11 @@ class PizzaApp:
         Notes
         -----
         - Для запуска приложения необходимо вызвать этот метод после создания
-            экземпляра класса `PizzaApp`.
+          экземпляра класса `PizzaApp`.
         """
         self.app.run()
 
 
 if __name__ == "__main__":
     my_site = PizzaApp()
-    my_site.run()
+    my_site.run()    
