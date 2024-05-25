@@ -1,103 +1,169 @@
-import connexion
-import requests
-from flask import Flask, jsonify, request, render_template
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-import bcrypt
-
-#app = connexion.App(__name__, specification_dir="./")
-
-app = Flask(__name__)
-# app.add_api("swagger.yml")
-app.config['JWT_SECRET_KEY'] = 'super-secret'
-jwt = JWTManager(app)
-
-users = []
-
-pizzas = [
-    {'id': 1, 'name': 'Margherita', 'description': 'Tomato sauce, mozzarella, and basil', 'price': 9.99},
-    {'id': 2, 'name': 'Pepperoni', 'description': 'Tomato sauce, mozzarella, and pepperoni', 'price': 11.99},
-    {'id': 3, 'name': 'Veggie', 'description': 'Tomato sauce, mozzarella, mushrooms, peppers, and onions', 'price': 10.99}
-]
-
-orders = []
-
-@app.route("/")
-def home():
-    return render_template("registration.html")
-
-# User authentication routes
-@app.route('/auth/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-
-    if any(user['email'] == email for user in users):
-        return jsonify({'error': 'Email already exists'}), 400
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    user = {'id': len(users) + 1, 'username': username, 'email': email, 'password': hashed_password.decode('utf-8')}
-    users.append(user)
-    return jsonify({'id': user['id'], 'username': user['username'], 'email': user['email']}), 201
-
-@app.route('/auth/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    user = next((user for user in users if user['email'] == email), None)
-    if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
-        access_token = create_access_token(identity=user['id'])
-        return jsonify({'token': access_token}), 200
-    else:
-        return jsonify({'error': 'Invalid credentials'}), 401
-    
-# Pizza routes
-@app.route('/pizzas', methods=['GET'])
-def get_pizzas():
-    return jsonify(pizzas), 200
-
-# Order routes
-@app.route('/orders', methods=['POST'])
-@jwt_required()
-def create_order():
-    data = request.get_json()
-    pizza_ids = [item['id'] for item in data['pizzas']]
-    customer = data['customer']
-    user_id = get_jwt_identity()
-
-    order = {
-        'id': len(orders) + 1,
-        'pizzas': [{'id': pizza['id'], 'name': pizza['name'], 'quantity': next(item['quantity'] for item in data['pizzas'] if item['id'] == pizza['id'])} for pizza in pizzas if pizza['id'] in pizza_ids],
-        'customer': customer,
-        'user_id': user_id,
-        'total': sum(pizza['price'] * next(item['quantity'] for item in data['pizzas'] if item['id'] == pizza['id']) for pizza in pizzas if pizza['id'] in pizza_ids),
-        'status': 'Pending'
-    }
-    orders.append(order)
-    return jsonify(order), 201
-
-@app.route('/orders/<int:order_id>', methods=['GET'])
-@jwt_required()
-def get_order(order_id):
-    user_id = get_jwt_identity()
-    order = next((order for order in orders if order['id'] == order_id and order['user_id'] == user_id), None)
-    if order:
-        return jsonify(order), 200
-    else:
-        return jsonify({'error': 'Order not found'}), 404
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-# @app.route('/')
-# def home():
-#     return render_template("registration.html")
+from flask import *
+from pwd_hashing import hashing
+from make_variant_time import variant_time, time_of_order
+import json
 
 
+class PizzaApp:
+    """
+    Класс для реализации веб-приложения пиццерии.
+
+    Этот класс содержит методы для обработки запросов и логики веб-приложения пиццерии,
+    включая аутентификацию пользователей, формирование заказов, отображение истории заказов и т.д.
+
+    Attributes
+    ----------
+    name_of_user : str
+        Имя текущего пользователя.
+    login_of_user : str
+        Логин текущего пользователя.
+    current_order_pizza : dict
+        Текущий заказ пиццы в формате {"название пиццы": {"количество": количество}}.
+    delivery_time : str
+        Время доставки текущего заказа в формате "чч:мм".
+    order_time : str
+        Время оформления текущего заказа в формате "чч:мм".
+    current_order_history : dict
+        История заказов текущего пользователя в формате {"дата": {"время заказа": "время доставки"}}.
+    app : Flask
+        Экземпляр Flask приложения.
+
+    Methods
+    -------
+    login()
+        Обработка запроса на страницу входа в приложение.
+    registration()
+        Обработка запроса на страницу регистрации в приложение.
+    making_order()
+        Обработка запроса на добавление пиццы в текущий заказ.
+    show_cart(order_status=None, message=None)
+        Обработка запроса на страницу отображения текущего заказа.
+    make_order()
+        Обработка запроса на оформление текущего заказа.
+    make_order_history(self)
+        Метод для формирования истории заказов текущего пользователя.
+    show_order_history()
+        Обработка запроса на страницу отображения истории заказов текущего пользователя.
+    run()
+        Запуск Flask приложения.
+
+    """
+
+    def __init__(self):
+        self.name_of_user = ''
+        self.login_of_user = ''
+        self.current_order_pizza = {}
+        self.delivery_time = ''
+        self.order_time = ''
+        self.current_order_history = {}
+        self.app = Flask(__name__)
+
+        @self.app.route("/", methods=["POST", "GET"])
+        def login():
+            """
+            Обработка запроса на страницу входа в приложение.
+
+            Этот метод обрабатывает запросы на страницу входа в приложение и проверяет
+            введенные пользователем логин и пароль. В случае успешной авторизации,
+            пользователь перенаправляется на главное меню приложения.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            str
+                HTML-код страницы входа в приложение или главного меню приложения.
+
+            Notes
+            -----
+            - Для проверки пароля используется функция hashing, отвечающая за хеширование пароля.
+            - В случае неуспешной авторизации, пользователю выводится сообщение об ошибке.
+            """
+            if request.method == "POST":
+                login = request.form.get("login")
+                password = request.form.get("password")
+                with open("data/user_data.json") as user_data:
+                    user_info = json.load(user_data)
+                    if login not in user_info.keys():
+                        return render_template("login.html",
+                                               error="Пользователя с таким логином не существует. Пройдите регистрацию.")
+                    elif user_info[login]["password"] != hashing(password):
+                        return render_template("login.html", error="Неправильный пароль.")
+                    else:
+                        self.name_of_user = user_info[login]["name"]
+                        self.login_of_user = login
+                        return render_template("main_menu.html")
+
+            return render_template("login.html")
+
+        @self.app.route("/registration", methods=["POST", "GET"])
+        def registration():
+            """
+            Обработка запроса на страницу регистрации в приложение.
+
+            Этот метод обрабатывает запросы на страницу регистрации в приложение и
+            регистрирует нового пользователя с введенными именем, логином и паролем.
+            В случае успешной регистрации, пользователь перенаправляется на главное меню приложения.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            str
+                HTML-код страницы регистрации в приложение или главного меню приложения.
+
+            Notes
+            -----
+            - Для сохранения пароля используется хеш-функция.
+            - В случае, если пользователь с таким логином уже существует,
+              пользователю выводится сообщение об ошибке.
+            """
+            if request.method == "POST":
+                name = request.form.get("name")
+                login = request.form.get("login")
+                password = request.form.get("password")
+                with open("data/user_data.json") as user_data:
+                    user_info = json.load(user_data)
+                if login not in user_info.keys():
+                    user_info[login] = {"name": name, "password": hashing(password)}
+                    with open("data/user_data.json", "w") as user_data:
+                        json.dump(user_info, user_data)
+                    self.name_of_user = name
+                    self.login_of_user = login
+                    return render_template("main_menu.html")
+                else:
+                    return render_template("registration.html", error="Пользователь с таким логином уже существует :(")
+            else:
+                return render_template("registration.html")
+            
+            
+            
+    def run(self):
+        """
+        Запуск приложения.
+
+        Этот метод запускает приложение Flask.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        - Для запуска приложения необходимо вызвать этот метод после создания
+            экземпляра класса `PizzaApp`.
+        """
+        self.app.run()
 
 
-# if __name__ == '__main__':
-
-#     app.run("app:app",host="127.0.1.0", port=8000, reload=True)
+if __name__ == "__main__":
+    my_site = PizzaApp()
+    my_site.run()
