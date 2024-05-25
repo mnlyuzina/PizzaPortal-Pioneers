@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История заказов</title>
+    <link rel="stylesheet" type="text/css" href="static/css/cart.css">
+</head>
+<body>
+    <h1>Ваша история заказов</h1>
+    <table id="cartTable">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Время оформления</th>
+                <th>Время доставки</th>
+            </tr>
+        </thead>
+        <tbody id="historyBody">
+        <form action="/order_history" method="POST">
+            {% for order in history %}
+            <tr>
+                <th>{{order.date}}</th>
+                <th>{{order.order_time}}</th>
+                <th>{{order.delivery_time}}</th>
+            </tr>
+            {% endfor %}
+        </form>
+        </tbody>
+    </table>
+    <li id="back_to_cart"><a href="/add_to_cart">Вернуться к выбору пиццы</a></li>
+</body>
+</html>
