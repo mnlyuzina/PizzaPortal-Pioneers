@@ -139,9 +139,90 @@ class PizzaApp:
                     return render_template("registration.html", error="Пользователь с таким логином уже существует :(")
             else:
                 return render_template("registration.html")
-            
-            
-            
+
+        @self.app.route("/add_to_cart", methods=["POST", "GET"])
+        def making_order():
+            """
+            Обработка запроса на добавление пиццы в текущий заказ.
+
+            Этот метод обрабатывает запросы на добавление пиццы в текущий заказ и
+            обновляет текущий заказ в соответствии с введенными данными.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            str
+                HTML-код главного меню приложения.
+
+            Notes
+            -----
+            - Если пицца уже добавлена в текущий заказ, то ее количество обновляется.
+            - Если пицца уже добавлена в текущий заказ и ее количество не изменилось,
+              то пользователь остается на главном меню приложения.
+            """
+            if request.method == "POST":
+                pizza = request.form["pizza"]
+                count = request.form["count"]
+                if pizza not in self.current_order_pizza.keys():
+                    self.current_order_pizza[pizza] = {"quantity": count}
+                elif pizza in self.current_order_pizza.keys() and self.current_order_pizza[pizza]["quantity"] == count:
+                    return render_template("main_menu.html")
+                else:
+                    self.current_order_pizza[pizza] = {"quantity": count}
+            return render_template("main_menu.html")
+
+        @self.app.route("/cart", methods=["POST", "GET"])
+        def show_cart(order_status=None, message=None):
+            """
+            Обработка запроса на просмотр текущего заказа.
+
+            Этот метод обрабатывает запросы на просмотр текущего заказа и
+            отображает информацию о заказанных пиццах, их количестве, цене и общий счет.
+            Также пользователь может удалить пиццу из текущего заказа.
+
+            Parameters
+            ----------
+            order_status : str, optional
+                Статус заказа. По умолчанию равен None.
+            message : str, optional
+                Сообщение, которое будет отображено пользователю. По умолчанию равен None.
+
+            Returns
+            -------
+            str
+                HTML-код страницы с информацией о текущем заказе.
+
+            Notes
+            -----
+            - Если заказ уже оформлен, то отображается пустая корзина.
+            - Если пользователь удаляет пиццу из текущего заказа, то информация о ней
+              удаляется из словаря `current_order_pizza`.
+            """
+            full_price = 0
+            if request.method == "POST":
+                if order_status == "Oформлен":
+                    return render_template("cart.html", username=self.name_of_user, final_order=[], full_price=0,
+                                           order_times=variant_time(), message=message)
+                elif not order_status:
+                    bad_pizza = request.form["remove"]
+                    if bad_pizza in self.current_order_pizza.keys():
+                        del self.current_order_pizza[bad_pizza]
+            final_order = []
+            with open("data/pizza_price.json", "r") as pizza_price:
+                price_list = json.load(pizza_price)
+            for pizza_name in self.current_order_pizza.keys():
+                info_one_pizza = {}
+                info_one_pizza["name"] = pizza_name
+                info_one_pizza["quantity"] = self.current_order_pizza[pizza_name]["quantity"]
+                info_one_pizza["price"] = price_list[pizza_name] * int(info_one_pizza["quantity"])
+                full_price += info_one_pizza["price"]
+                final_order.append(info_one_pizza)
+            return render_template("cart.html", username=self.name_of_user, final_order=final_order,
+                                   full_price=full_price,
+                                   order_times=variant_time())
     def run(self):
         """
         Запуск приложения.
@@ -159,11 +240,11 @@ class PizzaApp:
         Notes
         -----
         - Для запуска приложения необходимо вызвать этот метод после создания
-            экземпляра класса `PizzaApp`.
+          экземпляра класса `PizzaApp`.
         """
         self.app.run()
 
 
 if __name__ == "__main__":
     my_site = PizzaApp()
-    my_site.run()
+    my_site.run()    
