@@ -223,6 +223,102 @@ class PizzaApp:
             return render_template("cart.html", username=self.name_of_user, final_order=final_order,
                                    full_price=full_price,
                                    order_times=variant_time())
+            
+    @self.app.route("/make_order", methods=["POST", "GET"])
+        def make_order():
+            """
+            Оформление заказа.
+
+            Этот метод оформляет текущий заказ и добавляет его в историю заказов.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            str
+                HTML-код страницы с информацией о текущем заказе и статусом "Оформлен".
+
+            Notes
+            -----
+            - Если текущий заказ пуст, то пользователю выводится сообщение "Вы ничего не выбрали".
+            - После оформления заказа, текущий заказ очищается.
+            """
+            if request.method == "POST":
+                if len(self.current_order_pizza) == 0:
+                    return show_cart(order_status="Oформлен", message="Вы ничего не выбрали")
+                else:
+                    self.delivery_time = request.form["chosen_time"]
+                    make_order_history(self)
+                    self.current_order_pizza = {}
+                    return show_cart(order_status="Oформлен",
+                                     message=f"Ваш заказ успешно оформлен! Время доставки: {self.delivery_time}")
+
+        def make_order_history(self):
+            """
+            Создание истории заказов.
+
+            Этот метод создает словарь с информацией о текущем заказе и добавляет его
+            в общую историю заказов, которая хранится в файле `order_history.json`.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            None
+
+            Notes
+            -----
+            - Словарь `current_order_history` содержит информацию о дате, времени оформления
+              и времени доставки текущего заказа.
+            - Если пользователь еще не оформлял заказов, то для него создается пустой список
+              заказов в общей истории заказов.
+            """
+            self.current_order_history["date"] = time_of_order()[0]
+            self.current_order_history["order_time"] = time_of_order()[1]
+            self.current_order_history["delivery_time"] = self.delivery_time
+            with open("data/order_history.json") as history:
+                order_history = json.load(history)
+            if self.login_of_user not in order_history:
+                sp_of_orders = list()
+                sp_of_orders.append(self.current_order_history)
+                order_history[self.login_of_user] = sp_of_orders
+            else:
+                order_history[self.login_of_user].append(self.current_order_history)
+            with open("data/order_history.json", "w") as history:
+                json.dump(order_history, history)
+
+        @self.app.route("/order_history", methods=["POST", "GET"])
+        def show_order_history():
+            """
+            Отображение истории заказов.
+
+            Этот метод отображает информацию об истории заказов текущего пользователя.
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            str
+                HTML-код страницы с информацией об истории заказов.
+
+            Notes
+            -----
+            - Если пользователь еще не оформлял заказов, то отображается пустая страница
+              истории заказов.
+            """
+            with open("data/order_history.json") as history:
+                order_history = json.load(history)
+            if self.login_of_user in order_history:
+                return render_template("order_history.html", history=order_history[self.login_of_user])
+            else:
+                return render_template("order_history.html")
+    
     def run(self):
         """
         Запуск приложения.
