@@ -224,7 +224,7 @@ class PizzaApp:
                                    full_price=full_price,
                                    order_times=variant_time())
             
-    @self.app.route("/make_order", methods=["POST", "GET"])
+        @self.app.route("/make_order", methods=["POST", "GET"])
         def make_order():
             """
             Оформление заказа.
@@ -287,7 +287,8 @@ class PizzaApp:
                 sp_of_orders.append(self.current_order_history)
                 order_history[self.login_of_user] = sp_of_orders
             else:
-                order_history[self.login_of_user].append(self.current_order_history)
+                order_history[self.login_of_user].append(
+                    self.current_order_history)
             with open("data/order_history.json", "w") as history:
                 json.dump(order_history, history)
 
@@ -317,7 +318,7 @@ class PizzaApp:
             if self.login_of_user in order_history:
                 return render_template("order_history.html", history=order_history[self.login_of_user])
             else:
-                return render_template("order_history.html")
+                return render_template("order_history.html")   
     
     def run(self):
         """
